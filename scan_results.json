@@ -1,0 +1,30 @@
+{
+    "target": "127.0.0.1",
+    "scan_time": "2026-09-23T13:51:09.108481",
+    "results": [
+        {
+            "host": "127.0.0.1",
+            "protocol": "tcp",
+            "port": 135,
+            "state": "open",
+            "service": "msrpc",
+            "product": "Microsoft Windows RPC"
+        },
+        {
+            "host": "127.0.0.1",
+            "protocol": "tcp",
+            "port": 137,
+            "state": "filtered",
+            "service": "netbios-ns",
+            "product": ""
+        },
+        {
+            "host": "127.0.0.1",
+            "protocol": "tcp",
+            "port": 445,
+            "state": "open",
+            "service": "microsoft-ds",
+            "product": ""
+        }
+    ]
+}

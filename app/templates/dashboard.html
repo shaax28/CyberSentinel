@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CyberSentinel Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1300px;
+            margin: auto;
+            padding: 30px 0;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 34px;
+        }
+
+        .brand p {
+            color: #94a3b8;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user {
+            background: #1e293b;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .logout {
+            background: #dc2626;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .logout:hover {
+            opacity: 0.85;
+        }
+
+        .scan-box,
+        .section {
+            background: #1e293b;
+            padding: 22px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .scan-box form {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            flex: 1;
+            min-width: 250px;
+            padding: 13px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #0f172a;
+            color: white;
+        }
+
+        button,
+        .report-button {
+            padding: 13px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .report-button {
+            background: #16a34a;
+            margin-top: 15px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .card h3 {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .card p {
+            font-size: 28px;
+            margin: 10px 0 0;
+            font-weight: bold;
+        }
+
+        .section {
+            overflow-x: auto;
+        }
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #334155;
+            text-align: left;
+        }
+
+        th {
+            color: #93c5fd;
+        }
+
+        .severity {
+            font-weight: bold;
+        }
+
+        .empty {
+            color: #94a3b8;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- Top Bar -->
+    <div class="topbar">
+
+        <div class="brand">
+            <h1>🛡️ CyberSentinel</h1>
+            <p>
+                Advanced Network Security Monitoring &
+                Vulnerability Assessment Platform
+            </p>
+        </div>
+
+        <div class="user-area">
+
+            <div class="user">
+                👤 Logged in as:
+                <strong>{{ session.username }}</strong>
+            </div>
+
+            <a href="/logout" class="logout">
+                Logout
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- Scanner -->
+    <div class="scan-box">
+
+        <h2>🔍 Network Scanner</h2>
+
+        <form method="POST" action="/scan">
+
+            <input
+                type="text"
+                name="target"
+                placeholder="Enter authorized target e.g. 127.0.0.1"
+                value="127.0.0.1"
+                required
+            >
+
+            <button type="submit">
+                Start Scan
+            </button>
+
+        </form>
+
+        <a
+            href="/generate-report"
+            class="report-button"
+        >
+            📄 Generate Security Report
+        </a>
+
+    </div>
+
+
+    <!-- Dashboard Cards -->
+    <div class="cards">
+
+        <div class="card">
+            <h3>Total Results</h3>
+            <p>{{ results|length }}</p>
+        </div>
+
+        <div class="card">
+            <h3>Target</h3>
+            <p style="font-size:20px;">
+                {% if results %}
+                    {{ results[0].target }}
+                {% else %}
+                    -
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Open Ports</h3>
+            <p>
+                {{ results|selectattr("state", "equalto", "open")|list|length }}
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Filtered</h3>
+            <p>
+                {{ results|selectattr("state", "equalto", "filtered")|list|length }}
+            </p>
+        </div>
+
+        <div class="card">
+            <h3>Security Risk</h3>
+            <p>{{ risk }}</p>
+        </div>
+
+    </div>
+
+
+    <!-- Vulnerability Findings -->
+    <div class="section">
+
+        <h2>⚠️ Vulnerability Findings</h2>
+
+        {% if findings %}
+
+        <table>
+
+            <tr>
+                <th>Port</th>
+                <th>Service</th>
+                <th>Severity</th>
+                <th>Finding</th>
+                <th>Recommendation</th>
+            </tr>
+
+            {% for finding in findings %}
+
+            <tr>
+                <td>{{ finding.port }}</td>
+                <td>{{ finding.service }}</td>
+                <td class="severity">{{ finding.severity }}</td>
+                <td>{{ finding.title }}</td>
+                <td>{{ finding.recommendation }}</td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <p class="empty">
+            No potentially risky services detected.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Scan History -->
+    <div class="section">
+
+        <h2>🕒 Scan History</h2>
+
+        {% if results %}
+
+        <table>
+
+            <tr>
+                <th>ID</th>
+                <th>Target</th>
+                <th>Port</th>
+                <th>Protocol</th>
+                <th>State</th>
+                <th>Service</th>
+                <th>Product</th>
+                <th>Scan Time</th>
+            </tr>
+
+            {% for result in results %}
+
+            <tr>
+                <td>{{ result.id }}</td>
+                <td>{{ result.target }}</td>
+                <td>{{ result.port }}</td>
+                <td>{{ result.protocol }}</td>
+                <td>{{ result.state }}</td>
+                <td>{{ result.service }}</td>
+                <td>{{ result.product or "-" }}</td>
+                <td>{{ result.scan_time }}</td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <p class="empty">
+            No scan history available.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- Network Results -->
+    <div class="section">
+
+        <h2>🌐 Network Scan Results</h2>
+
+        {% if results %}
+
+        <table>
+
+            <tr>
+                <th>Port</th>
+                <th>Protocol</th>
+                <th>State</th>
+                <th>Service</th>
+                <th>Product</th>
+            </tr>
+
+            {% for result in results %}
+
+            <tr>
+                <td>{{ result.port }}</td>
+                <td>{{ result.protocol }}</td>
+                <td>{{ result.state }}</td>
+                <td>{{ result.service }}</td>
+                <td>{{ result.product or "-" }}</td>
+            </tr>
+
+            {% endfor %}
+
+        </table>
+
+        {% else %}
+
+        <p class="empty">
+            No network scan results available.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="footer">
+        CyberSentinel • Authorized Security Testing Platform
+    </div>
+
+</div>
+
+</body>
+</html>

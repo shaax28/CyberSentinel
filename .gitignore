@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+cybersentinel.db
+
+reports/*.pdf
+
+.env
+*.log
+
+.vscode/
+.idea/
